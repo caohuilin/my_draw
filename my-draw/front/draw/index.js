@@ -107,32 +107,56 @@ const Draw = React.createClass({
 	}
 })
 
+const Clock = React.createClass({
+	getInitialState(){
+		return {now:+new Date()}
+	},
+	componentWillMount(){
+		this.clock = setInterval(()=>{
+			this.setState({now:+new Date()})
+		}, 1000)
+	},
+	componentWillUnmount(){
+		clearInterval(this.clock)
+	},
+	render(){
+		return <span>{((this.state.now-this.props.startTime)/1000).toFixed()}</span>
+	}
+})
 const Online = React.createClass({
 	mixins: [WildReact],
 	getInitialState(){
 		return {online:{}, gameState:null}
 	},
 	componentDidMount(){
-		this.bindAsObject(online, "online");
-		this.bindAsObject(gameState, "gameState");
+		this.bindAsObject(online, "online")
+		this.bindAsObject(gameState, "gameState")
+	},
+	onClear(){
+		pixelDataRef.remove()
 	},
 	render(){
+		const serverTime = this.state.online['system']
 		const users = _.map(this.state.online, (v, k)=>{
+			if(serverTime-v>30*1000){
+				return null
+			}
+			if(k==='system') return null
 			if(k==='.key') return null
 			return <div key={k}>{k}</div>
 		})
 		let gameStatemsg = null
 		let question = null
+		let clearButton = null
 		const gameState = this.state.gameState
 		if(gameState){
 			if(gameState.state === 'WAITING'){
 				gameStatemsg = <div>人数不足，等待中</div>
 			}else if(gameState.state === 'GAME_START'){
-				gameStatemsg = <div>游戏进行中</div>
-			}
-			if(gameState.state === 'GAME_START'){
+				gameStatemsg = <div>游戏进行中 <Clock startTime={gameState.startTime}></Clock> </div>
 				if(gameState.userNow == username){
 					question = <div>现在轮到你开始游戏，问题是{gameState.problem}</div>
+					clearButton = <div><button onClick={this.onClear}>清除</button></div>
 				}
 			}
 		}
