@@ -17,8 +17,6 @@ setInterval(()=>{
 	online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
 }, 10000)
 
-
-
 const Draw = React.createClass({
 	getInitialState(){
 		return {}
@@ -26,34 +24,68 @@ const Draw = React.createClass({
 	componentDidMount(){
 		this.canvas = this.refs.canvas
 		window.context = this.context = this.canvas.getContext('2d')
-		this.mouseDown = 0
-		this.lastPoint = null
-		this.rectArr = {}
+		this.opNow = []
+		this.drawing = false
+		this.context.fillStyle = '#000'
+		this.context.lineJoin = 'round'
+		this.context.lineCap = 'round'
+		this.context.lineWidth = 5
 
-		this.context.fillStyle='red'
-
-		pixelDataRef.on('child_added', this.drawPixel, function (error) {
-		      if(error.code == "TOO_BIG"){
-		        alert("画图信息数据过多 已自动清理画板")
-		      }
-		      pixelDataRef.remove()
-		})
-		pixelDataRef.on('child_changed', this.drawPixel)
-		pixelDataRef.on('child_removed', this.clearPixel)
+		pixelDataRef.on('child_added', this.reDrawLine)
+		pixelDataRef.on('child_removed', _.throttle(this.clear, 1000))
 
 	},
-	drawPixel(snapshot){
-		// debug('drawPixel', snapshot.val(), snapshot.key())
-		var [x, y] = snapshot.key().split(':')
-		this.context.fillStyle = 'red'
-		this.context.fillRect(x, y, 5, 5)
+	clear(){
+		debug('clear')
+		this.context.fillStyle = '#fff'
+		this.context.fillRect(0, 0, this.props.width, this.props.height)
+		this.context.fillStyle = '#000'
 	},
-	clearPixel(snapshot){
-		// debug('clearPixel', data.val(), data.key())
-		var [x, y] = snapshot.key().split(':')
-		this.context.fillStyle = 'white'
-		this.context.fillRect(x, y, 5, 5)
+	reDrawLine(snapshot){
+		debug('reDrawLine')
+		var json = snapshot.val();
+		this.drawLine(JSON.parse(json))
 	},
+	drawLine(pointList){
+		debug('drawLine', pointList)
+		const l = pointList.length
+		this.drawLineStart(pointList[0], pointList[1])
+		for(let i=0;i<l;i+=2){
+			this.drawLineMoveQuick(pointList[i], pointList[i+1])
+		}
+		this.drawLineEnd()
+	},
+	calcXY(x, y){
+		const {left, top} = this.canvas.getBoundingClientRect()
+		return {x:x-left, y:y-top}
+	},
+	drawLineStart(x, y){
+		debug('drawLineStart')
+		this.opNow = []
+		this.drawing = true
+		this.context.beginPath()
+		this.context.moveTo(x, y)
+	},
+	drawLineEnd(){
+		if(this.opNow.length>0) pixelDataRef.push(JSON.stringify(this.opNow))
+		this.drawing = false
+		debug('drawLineEnd')
+		this.context.stroke()
+	},
+	drawLineMove(x, y){
+		if(this.drawing){
+			this.opNow.push(x)
+			this.opNow.push(y)
+			this.context.lineTo(x, y);
+			this.context.stroke()
+		}
+	},
+	drawLineMoveQuick(x, y){
+		if(this.drawing){
+			this.context.lineTo(x, y);
+		}
+	},
+
 	componentDidUmount(){
 
 	},
@@ -61,37 +93,24 @@ const Draw = React.createClass({
 		return false
 	},
 	onMouseDown(event){
-		this.mouseDown = 1
-
-		this.drawLineOnMouseMove(event)
+		if(this.props.disable) return
+		const {x, y} = this.calcXY(event.clientX, event.clientY)
+		this.drawLineStart(x, y)
 	},
 	onMouseOut(){
-		this.mouseDown = 0
-
-		this.lastPoint = null
-		this.drawLineOnMouseMove(event)
+		if(this.props.disable) return
+		this.drawLineEnd()	
 	},
 	onMouseUp(){
-		this.mouseDown = 0
-
-		this.setCanvasLine()
+		if(this.props.disable) return
+		this.drawLineEnd()
 	},
 	onMouseMove(event){
-		this.drawLineOnMouseMove(event)
+		if(this.props.disable) return
+		const {x, y} = this.calcXY(event.clientX, event.clientY)
+		this.drawLineMove(x, y)	
 	},
-	setCanvasLine(){
-		pixelDataRef.update(this.rectArr)
-		this.rectArr = {}
-	},
-	drawLineOnMouseMove(event){
-		if(!this.mouseDown) return
-		event.preventDefault()
-		const {clientX, clientY} = event
-		// debug('drawLineOnMouseMove', clientX, clientY)
-		this.context.fillStyle = 'red'
-		this.context.fillRect(clientX, clientY, 5, 5)
-		this.rectArr[clientX +":" + clientY] = 1
-	},
+
 
 	render(){
 		const {width, height} = this.props
@@ -101,6 +120,7 @@ const Draw = React.createClass({
 				onMouseOut={this.onMouseOut}
 				onMouseUp={this.onMouseUp}
 				onMouseMove={this.onMouseMove}
+				style={{cursor:'default'}}
 			>
 			</canvas>
 		)
@@ -126,11 +146,10 @@ const Clock = React.createClass({
 const Online = React.createClass({
 	mixins: [WildReact],
 	getInitialState(){
-		return {online:{}, gameState:null}
+		return {online:{}}
 	},
 	componentDidMount(){
 		this.bindAsObject(online, "online")
-		this.bindAsObject(gameState, "gameState")
 	},
 	onClear(){
 		pixelDataRef.remove()
@@ -148,7 +167,7 @@ const Online = React.createClass({
 		let gameStatemsg = null
 		let question = null
 		let clearButton = null
-		const gameState = this.state.gameState
+		const gameState = this.props.gameState
 		if(gameState){
 			if(gameState.state === 'WAITING'){
 				gameStatemsg = <div>人数不足，等待中</div>
@@ -214,11 +233,20 @@ const Chat = React.createClass({
 	}
 })
 const App = React.createClass({
+	mixins: [WildReact],
+	getInitialState(){
+		return {gameState:null}
+	},
+	componentDidMount(){
+		this.bindAsObject(gameState, "gameState")
+	},
 	render(){
+		if(!this.state.gameState) return <div>loading</div>
+		const disable = this.state.gameState.userNow === username?false:true
 		return (
 			<div>
-				<Draw width={480} height={420} />
-				<Online/>
+				<Draw width={480} height={420} disable={disable}/>
+				<Online gameState={this.state.gameState}/>
 				<Chat/>
 			</div>
 		)

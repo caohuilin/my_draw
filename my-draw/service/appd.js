@@ -92,8 +92,8 @@ function startGame(users){
 }
 
 function userSuccess(username){
-	chatroom.push({name:'system', content:`恭喜${username}答对了`})	
 	gameState.update({state: 'WAITING'}, ()=>{
+		chatroom.push({name:'system', content:`恭喜${username}答对了`})
 		pixelDataRef.remove()
 		online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
 	})
