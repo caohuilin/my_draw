@@ -7,6 +7,7 @@ const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/')
 const online = wilddog.child('online')
 const chatroom = wilddog.child('chatroom')
 const gameState = wilddog.child('gameState')
+const pixelDataRef = wilddog.child('draw1')
 
 const username = location.search.slice(1)
 
@@ -16,7 +17,6 @@ setInterval(()=>{
 	online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
 }, 10000)
 
-var pixelDataRef = wilddog.child('draw1')
 
 
 const Draw = React.createClass({
@@ -48,7 +48,7 @@ const Draw = React.createClass({
 		this.context.fillStyle = 'red'
 		this.context.fillRect(x, y, 5, 5)
 	},
-	clearPixel(data){
+	clearPixel(snapshot){
 		// debug('clearPixel', data.val(), data.key())
 		var [x, y] = snapshot.key().split(':')
 		this.context.fillStyle = 'white'
@@ -168,6 +168,7 @@ const Online = React.createClass({
 				{users}
 				{gameStatemsg}
 				{question}
+				{clearButton}
 			</div>
 		)
 	}
@@ -179,7 +180,7 @@ const Chat = React.createClass({
 		return {chatroom:[], value:''}
 	},
 	componentDidMount(){
-		this.bindAsArray(chatroom.limitToLast(10), "chatroom");
+		this.bindAsArray(chatroom.limitToLast(10), "chatroom")
 	},
 	send(event){
 		event.preventDefault()

@@ -6,8 +6,17 @@ const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/')
 const online = wilddog.child('online')
 const gameState = wilddog.child('gameState')
 const chatroom = wilddog.child('chatroom')
-
+const pixelDataRef = wilddog.child('draw1')
 const debug = console.log.bind(console)
+
+const username = 'system'
+
+online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
+
+setInterval(()=>{
+	online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
+}, 10000)
+
 
 let gameStateValue = null
 
@@ -15,12 +24,24 @@ gameState.on('value', (snapshot)=>{
 	gameStateValue = snapshot.val()
 })
 
+function onlineUser(users){
+	const ans = []
+	const serverTime = users['system']
+	for(let i in users){
+		if(i==='system') return 
+		if(i==='.key') return 
+		if(serverTime-users[i]>30000) return 
+		ans.push(i)
+	}
+	return ans
+}
+
 gameState.once('value', ()=>{
 	online.on('value', (snapshot)=>{
 		const users = snapshot.val();
 		debug('@value', users)
 		const now = +new Date()
-		const userList = _.keys(users).filter(v=>(now-v)/1000<30)
+		const userList = onlineUser(users)
 		if(gameStateValue.state == 'WAITING'){
 			if(_.keys(users).length >= 3){
 				startGame(users)
@@ -30,6 +51,15 @@ gameState.once('value', ()=>{
 				})
 			}
 		}
+	})
+	chatroom.limitToLast(10).on('child_added', (snapshot)=>{
+		const newChat = snapshot.val()
+		if(newChat.content.indexOf(gameStateValue.problem)!=-1){
+			if(newChat.name!=gameStateValue.userNow){
+				userSuccess(newChat.name)
+			}
+		}
+
 	})
 })
 
@@ -47,17 +77,25 @@ const Problems = '鸡蛋 太阳 母鸡 水瓶 塔 椅子 台灯 书包 枕头 �
 
 function startGame(users){
 	debug('startGame', users)
-	const userList = _.keys(users)
+	const userList = onlineUser(users)
 	const userNow = userList[_.random(userList.length-1)]
 	const problem = Problems[_.random(Problems.length-1)]
 	const newState = {
 		state: 'GAME_START',
 		userNow,
 		problem,
-		stateTime: Wilddog.ServerValue.TIMESTAMP,
+		startTime: Wilddog.ServerValue.TIMESTAMP,
 	}
 	debug('newState', newState)
 	gameState.set(newState)
 	chatroom.push({name:'system', content:`开始游戏，${userNow}开始画画`})
+}
+
+function userSuccess(username){
+	chatroom.push({name:'system', content:`恭喜${username}答对了`})	
+	gameState.update({state: 'WAITING'}, ()=>{
+		pixelDataRef.remove()
+		online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
+	})
 }
 
