@@ -1,3 +1,4 @@
+require('./index.less')
 console.log('[APP] app start ' + process.env.NODE_ENV)
 
 window.Link = ReactRouter.Link
@@ -120,7 +121,7 @@ const Draw = React.createClass({
 				onMouseOut={this.onMouseOut}
 				onMouseUp={this.onMouseUp}
 				onMouseMove={this.onMouseMove}
-				style={{cursor:'default'}}
+				style={{cursor:'default', width:width, height:height}}
 			>
 			</canvas>
 		)
@@ -180,7 +181,7 @@ const Online = React.createClass({
 			}
 		}
 		return (
-			<div>
+			<div className="online">
 				<div>
 					 在线用户列表:
 				</div>
@@ -217,7 +218,7 @@ const Chat = React.createClass({
 			)
 		})
 		return (
-			<div>
+			<div className="chat">
 				<div>
 					聊天:
 				</div>
@@ -244,7 +245,7 @@ const App = React.createClass({
 		if(!this.state.gameState) return <div>loading</div>
 		const disable = this.state.gameState.userNow === username?false:true
 		return (
-			<div>
+			<div className="app">
 				<Draw width={480} height={420} disable={disable}/>
 				<Online gameState={this.state.gameState}/>
 				<Chat/>
