@@ -5,6 +5,7 @@ window.Link = ReactRouter.Link
 const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/')
 
 const online = wilddog.child('online')
+const chatroom = wilddog.child('chatroom')
 
 const username = location.search.slice(1)
 
@@ -128,9 +129,54 @@ const Online = React.createClass({
 	}
 })
 
+const Chat = React.createClass({
+	mixins: [WildReact],
+	getInitialState(){
+		return {chatroom:[], value:''}
+	},
+	componentDidMount(){
+		this.bindAsArray(chatroom, "chatroom");
+	},
+	send(event){
+		event.preventDefault()
+		if(this.state.value==='') return
+		chatroom.push({name:username, content:this.state.value})
+		this.setState({value:''})
+	},
+	onChange(event){
+		this.setState({value:event.target.value})
+	},
+	render(){
+		const chats = this.state.chatroom.map((v, i)=>{
+			return (
+				<li key={i}>{v.name}:{v.content}</li>
+			)
+		})
+		return (
+			<div>
+				<div>
+					聊天:
+				</div>
+				<ul>
+					{chats}
+				</ul>
+				<form>
+					<input value={this.state.value} onChange={this.onChange}/>
+					<input type="submit" onClick={this.send} value="submit"></input>
+				</form>
+			</div>
+			)
+	}
+})
 const App = React.createClass({
 	render(){
-		return <div><Draw width={480} height={420} /><Online/></div>
+		return (
+			<div>
+				<Draw width={480} height={420} />
+				<Online/>
+				<Chat/>
+			</div>
+		)
 	}
 })
 
