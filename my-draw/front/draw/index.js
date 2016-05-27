@@ -6,6 +6,7 @@ const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/')
 
 const online = wilddog.child('online')
 const chatroom = wilddog.child('chatroom')
+const gameState = wilddog.child('gameState')
 
 const username = location.search.slice(1)
 
@@ -108,22 +109,40 @@ const Draw = React.createClass({
 const Online = React.createClass({
 	mixins: [WildReact],
 	getInitialState(){
-		return {online:{}}
+		return {online:{}, gameState:null}
 	},
 	componentDidMount(){
 		this.bindAsObject(online, "online");
+		this.bindAsObject(gameState, "gameState");
 	},
 	render(){
 		const users = _.map(this.state.online, (v, k)=>{
 			if(k==='.key') return null
 			return <div key={k}>{k}</div>
 		})
+		let gameStatemsg = null
+		let question = null
+		const gameState = this.state.gameState
+		if(gameState){
+			if(gameState.state === 'WAITING'){
+				gameStatemsg = <div>人数不足，等待中</div>
+			}else if(gameState.state === 'GAME_START'){
+				gameStatemsg = <div>游戏进行中</div>
+			}
+			if(gameState.state === 'GAME_START'){
+				if(gameState.userNow == username){
+					question = <div>现在轮到你开始游戏，问题是{gameState.problem}</div>
+				}
+			}
+		}
 		return (
 			<div>
 				<div>
 					 在线用户列表:
 				</div>
 				{users}
+				{gameStatemsg}
+				{question}
 			</div>
 		)
 	}
