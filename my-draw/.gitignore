@@ -1,0 +1,12 @@
+node_modules
+front/node_modules
+front/bower_components
+service/data
+.idea/
+db.json
+npm-debug.log
+global.js
+vendor.js
+front/page-redux/app.js
+front/page-redux/app.js.map
+front/page-redux/vendor.js.map
