@@ -28,9 +28,9 @@ function onlineUser(users){
 	const ans = []
 	const serverTime = users['system']
 	for(let i in users){
-		if(i==='system') return 
-		if(i==='.key') return 
-		if(serverTime-users[i]>30000) return 
+		if(i==='system') continue
+		if(i==='.key') continue
+		if(serverTime-users[i]>30000) continue
 		ans.push(i)
 	}
 	return ans
@@ -42,6 +42,7 @@ gameState.once('value', ()=>{
 		debug('@value', users)
 		const now = +new Date()
 		const userList = onlineUser(users)
+		debug('@userList', userList)
 		if(gameStateValue.state == 'WAITING'){
 			if(_.keys(users).length >= 3){
 				startGame(users)
@@ -50,6 +51,10 @@ gameState.once('value', ()=>{
 					state: 'WAITING'
 				})
 			}
+		}
+
+		if(userList.indexOf(gameStateValue.userNow)==-1){
+			startGame(users)
 		}
 	})
 	chatroom.limitToLast(10).on('child_added', (snapshot)=>{
