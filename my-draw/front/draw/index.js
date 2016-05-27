@@ -10,10 +10,11 @@ const gameState = wilddog.child('gameState')
 
 const username = location.search.slice(1)
 
-online.update({[username]:true})
+online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
 
-online.child(username).onDisconnect().remove()
-
+setInterval(()=>{
+	online.update({[username]:Wilddog.ServerValue.TIMESTAMP})
+}, 10000)
 
 var pixelDataRef = wilddog.child('draw1')
 
@@ -154,7 +155,7 @@ const Chat = React.createClass({
 		return {chatroom:[], value:''}
 	},
 	componentDidMount(){
-		this.bindAsArray(chatroom, "chatroom");
+		this.bindAsArray(chatroom.limitToLast(10), "chatroom");
 	},
 	send(event){
 		event.preventDefault()
