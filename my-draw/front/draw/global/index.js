@@ -16,5 +16,7 @@ GLOBAL._ = require('lodash')
 GLOBAL.TcombReact = require('tcomb-react')
 
 GLOBAL.ReactMontion = require('react-motion')
+GLOBAL.Wilddog = require('wilddog')
+GLOBAL.WildReact = require('wildreact')
 
 window = Object.assign(window, GLOBAL)

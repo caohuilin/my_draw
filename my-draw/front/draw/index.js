@@ -3,6 +3,16 @@ console.log('[APP] app start ' + process.env.NODE_ENV)
 window.Link = ReactRouter.Link
 
 const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/')
+
+const online = wilddog.child('online')
+
+const username = location.search.slice(1)
+
+online.update({[username]:true})
+
+online.child(username).onDisconnect().remove()
+
+
 var pixelDataRef = wilddog.child('draw1')
 
 
@@ -30,13 +40,13 @@ const Draw = React.createClass({
 
 	},
 	drawPixel(snapshot){
-		debug('drawPixel', snapshot.val(), snapshot.key())
+		// debug('drawPixel', snapshot.val(), snapshot.key())
 		var [x, y] = snapshot.key().split(':')
 		this.context.fillStyle = 'red'
 		this.context.fillRect(x, y, 5, 5)
 	},
 	clearPixel(data){
-		debug('clearPixel', data.val(), data.key())
+		// debug('clearPixel', data.val(), data.key())
 		var [x, y] = snapshot.key().split(':')
 		this.context.fillStyle = 'white'
 		this.context.fillRect(x, y, 5, 5)
@@ -74,7 +84,7 @@ const Draw = React.createClass({
 		if(!this.mouseDown) return
 		event.preventDefault()
 		const {clientX, clientY} = event
-		debug('drawLineOnMouseMove', clientX, clientY)
+		// debug('drawLineOnMouseMove', clientX, clientY)
 		this.context.fillStyle = 'red'
 		this.context.fillRect(clientX, clientY, 5, 5)
 		this.rectArr[clientX +":" + clientY] = 1
@@ -94,9 +104,33 @@ const Draw = React.createClass({
 	}
 })
 
+const Online = React.createClass({
+	mixins: [WildReact],
+	getInitialState(){
+		return {online:{}}
+	},
+	componentDidMount(){
+		this.bindAsObject(online, "online");
+	},
+	render(){
+		const users = _.map(this.state.online, (v, k)=>{
+			if(k==='.key') return null
+			return <div key={k}>{k}</div>
+		})
+		return (
+			<div>
+				<div>
+					 在线用户列表:
+				</div>
+				{users}
+			</div>
+		)
+	}
+})
+
 const App = React.createClass({
 	render(){
-		return <div><Draw width={480} height={420} /></div>
+		return <div><Draw width={480} height={420} /><Online/></div>
 	}
 })
 
