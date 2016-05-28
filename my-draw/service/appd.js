@@ -83,6 +83,7 @@ const Problems = '鸡蛋 太阳 母鸡 水瓶 塔 椅子 台灯 书包 枕头 �
 function startGame(users){
 	debug('startGame', users)
 	const userList = onlineUser(users)
+	if(userList.length==0) return
 	const userNow = userList[_.random(userList.length-1)]
 	const problem = Problems[_.random(Problems.length-1)]
 	const newState = {
