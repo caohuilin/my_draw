@@ -82,10 +82,11 @@ const Draw = React.createClass({
         this.context.moveTo(x, y);
     },
     drawLineEnd(){
-        if (this.opNow.length > 0) pixelDataRef.push(JSON.stringify(this.opNow));
-        this.drawing = false;
+        console.assert(this.drawing === true)
         debug('drawLineEnd');
+        if(this.opNow.length > 0 )pixelDataRef.push(JSON.stringify(this.opNow));
         this.context.stroke();
+        this.drawing = false;
     },
     drawLineMove(x, y){
         if (this.drawing) {
