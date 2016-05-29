@@ -22,7 +22,7 @@ function hashCode(s) {
     var hash = 0, i, chr, len;
     if (s.length === 0) return hash;
     for (i = 0, len = s.length; i < len; i++) {
-        chr   = s.charCodeAt(i);
+        chr = s.charCodeAt(i);
         //hash  = ((hash << 5) - hash) + chr;
         //hash |= 0; // Convert to 32bit integer
         hash += chr;
@@ -153,7 +153,7 @@ const Clock = React.createClass({
         clearInterval(this.clock)
     },
     render(){
-        return <span>{((this.state.now - this.props.startTime) / 1000).toFixed()}</span>
+        return <span>{120 - ((this.props.startTime - this.state.now) / 1000).toFixed()}</span>
     }
 });
 const Online = React.createClass({
@@ -175,11 +175,12 @@ const Online = React.createClass({
             }
             if (k === 'system') return null;
             if (k === '.key') return null;
-            const imgSrc = `./img/head${hashCode(k)%20+1}.jpg`;
+            const imgSrc = `./img/head${hashCode(k) % 20 + 1}.jpg`;
             return <li key={k}><img src={imgSrc} alt=""/>{k}</li>
         });
         let gameStatemsg = null;
         let question = null;
+        let remind = null;
         let clearButton = null;
         const gameState = this.props.gameState;
         if (gameState) {
@@ -188,8 +189,12 @@ const Online = React.createClass({
             } else if (gameState.state === 'GAME_START') {
                 gameStatemsg = <div>游戏进行中 <Clock startTime={gameState.startTime}></Clock></div>
                 if (gameState.userNow == username) {
-                    question = <div className="ques">{gameState.problem}</div>
-                    clearButton = <img src="./img/clear.jpg" onClick={this.onClear} />
+                    question = <div className="ques">{gameState.problem}</div>;
+                    clearButton = <div className="clear"><img src="./img/clear.jpg" onClick={this.onClear}/></div>
+                }
+                if (gameState.userNow != username) {
+                    console.log(gameState.remind);
+                    remind = <div className="remind">提示：{gameState.remind}</div>
                 }
             }
         }
@@ -199,15 +204,13 @@ const Online = React.createClass({
                     {users}
                 </ul>
                 {question}
-                <div className="clear">
-                    {clearButton}
-                </div>
-
+                {remind}
+                {clearButton}
+                {gameStatemsg}
             </div>
         )
     }
 });
-
 
 
 const Chat = React.createClass({
@@ -229,9 +232,11 @@ const Chat = React.createClass({
     },
     render(){
         const chats = this.state.chatroom.map((v, i)=> {
-            const imgSrc = `./img/head${hashCode(v.name)%20+1}.jpg`;
+            const imgSrc = `./img/head${hashCode(v.name) % 20 + 1}.jpg`;
             return (
-                <li key={i}><img src={imgSrc} alt=""/><div className="content">{v.name}:{v.content}</div></li>
+                <li key={i}><img src={imgSrc} alt=""/>
+                    <div className="content">{v.name}:{v.content}</div>
+                </li>
             )
         });
         return (
@@ -266,11 +271,11 @@ const App = React.createClass({
         const disable = this.state.gameState.userNow === username ? false : true;
         return (
             <div className="app">
-                    <div className="left">
-                        <Draw width={680} height={450} disable={disable}/>
-                        <Online gameState={this.state.gameState}/>
-                    </div>
-                    <Chat/>
+                <div className="left">
+                    <Draw width={680} height={450} disable={disable}/>
+                    <Online gameState={this.state.gameState}/>
+                </div>
+                <Chat/>
             </div>
         )
     }
