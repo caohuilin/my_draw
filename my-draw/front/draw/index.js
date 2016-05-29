@@ -155,7 +155,12 @@ const Clock = React.createClass({
         clearInterval(this.clock)
     },
     render(){
-        return <span>{120 - ((this.props.startTime - this.state.now) / 1000).toFixed()}</span>
+        let time = 120 - ((this.state.now - this.props.startTime) / 1000).toFixed()
+        if(time<0){
+            return <span>游戏结束</span>
+        }else{
+            return <span>游戏进行中，倒计时：{time}</span>
+        }
     }
 });
 const Online = React.createClass({
@@ -187,9 +192,9 @@ const Online = React.createClass({
         const gameState = this.props.gameState;
         if (gameState) {
             if (gameState.state === 'WAITING') {
-                gameStatemsg = <div>人数不足，等待中</div>
+                gameStatemsg = <div>请稍等片刻</div>
             } else if (gameState.state === 'GAME_START') {
-                gameStatemsg = <div>游戏进行中 <Clock startTime={gameState.startTime}></Clock></div>
+                gameStatemsg = <div><Clock startTime={gameState.startTime}></Clock></div>
                 if (gameState.userNow == username) {
                     question = <div className="ques">{gameState.problem}</div>;
                     clearButton = <div className="clear"><img src="./img/clear.jpg" onClick={this.onClear}/></div>
