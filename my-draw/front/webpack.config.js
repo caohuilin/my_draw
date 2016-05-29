@@ -74,7 +74,7 @@ var config = {
       loaders: loaders
     }, {
       test: /\.less$/,
-      loaders: ['style', 'css', 'less']
+      loaders: ['style', 'css?-url', 'less']
     }],
     noParse: [
       path.join(__dirname, 'node_modules', 'babel-core', 'browser.min.js')
