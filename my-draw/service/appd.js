@@ -36,9 +36,28 @@ function onlineUser(users) {
     return ans
 }
 
+function judgeGameTimeout(gameStateValue, users){
+    debug('judge timeout', gameStateValue, users)
+    if(gameStateValue.state!='GAME_START'){
+        return
+    }
+    const startTime = gameStateValue.startTime
+    const userLastTime = users['system']
+    if(!userLastTime){
+        return
+    }
+    const runTime = (userLastTime - startTime)/1000
+    debug('runTime', runTime)
+    if(runTime > 130){
+        chatroom.push({name: 'system', content: `游戏超时，重新开始`});
+        startGame(users)
+    }
+}
+
 gameState.once('value', ()=> {
     online.on('value', (snapshot)=> {
         const users = snapshot.val();
+        judgeGameTimeout(gameStateValue, users)
         debug('@value', users);
         const now = +new Date();
         const userList = onlineUser(users);
