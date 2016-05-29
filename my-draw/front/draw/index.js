@@ -53,6 +53,8 @@ const Draw = React.createClass({
         this.context.fillStyle = '#fff';
         this.context.fillRect(0, 0, this.props.width, this.props.height);
         this.context.fillStyle = '#000';
+        this.drawing = false;
+        this.opNow = [];
     },
     reDrawLine(snapshot){
         debug('reDrawLine');
