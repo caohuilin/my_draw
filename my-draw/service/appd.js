@@ -102,8 +102,14 @@ const Reminds = '食物 自然界 动物 物体 建筑 家具 家具 学习用�
 
 function startGame(users) {
     debug('startGame', users);
-    const userList = onlineUser(users);
+    let userList = onlineUser(users);
     if (userList.length == 0) return;
+    // 不要重复选择游戏者
+    const oldUserNow = gameStateValue.userNow
+    const canUserList = userList.filter(v=>v!=oldUserNow)
+    if(canUserList.length>0){
+        userList = canUserList
+    }
     const userNow = userList[_.random(userList.length - 1)];
     const index = _.random(Problems.length - 1);
     const problem = Problems[index];
