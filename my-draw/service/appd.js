@@ -94,7 +94,7 @@ function startGame(users) {
         userNow,
         problem,
         remind,
-        startTime: 90000
+        startTime: Wilddog.ServerValue.TIMESTAMP,
     };
     debug('newState', newState);
     gameState.set(newState);
