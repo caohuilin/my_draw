@@ -105,7 +105,9 @@ function userSuccess(username) {
     gameState.update({state: 'WAITING'}, ()=> {
         setTimeout(()=> {
             chatroom.push({name: 'system', content: `恭喜${username}答对了`});
-            pixelDataRef.remove();
+            setTimeout(()=>{
+                pixelDataRef.remove();
+            }, 1000)
             online.update({[username]: Wilddog.ServerValue.TIMESTAMP})
         }, 1000);
 
