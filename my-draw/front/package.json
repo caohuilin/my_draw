@@ -60,5 +60,8 @@
     "test:cov": "karma start ./karma.conf.js --single-run --reporters coverage"
   },
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "draft-js-emoji-plugin": "^1.2.0",
+    "draft-js-plugins-editor": "^1.0.1"
+  }
 }

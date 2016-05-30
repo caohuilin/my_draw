@@ -1,9 +1,11 @@
+
+
 require('./index.less');
 console.log('[APP] app start ' + process.env.NODE_ENV);
 
 window.Link = ReactRouter.Link;
 
-const wilddog = new Wilddog('https://wkc-test1.wilddogio.com/');
+const wilddog = new Wilddog('https://smallchat.wilddogio.com/');
 
 const online = wilddog.child('online');
 const chatroom = wilddog.child('chatroom');
@@ -11,6 +13,7 @@ const gameState = wilddog.child('gameState');
 const pixelDataRef = wilddog.child('draw1');
 
 const username = location.search.slice(1);
+
 
 online.update({[username]: Wilddog.ServerValue.TIMESTAMP});
 
@@ -29,6 +32,8 @@ function hashCode(s) {
     }
     return hash;
 }
+
+
 
 const Draw = React.createClass({
     getInitialState(){
@@ -82,7 +87,7 @@ const Draw = React.createClass({
         this.context.moveTo(x, y);
     },
     drawLineEnd(){
-        console.assert(this.drawing === true)
+        //console.assert(this.drawing === true)
         debug('drawLineEnd');
         if(this.opNow.length > 0 )pixelDataRef.push(JSON.stringify(this.opNow));
         this.context.stroke();
@@ -164,6 +169,7 @@ const Clock = React.createClass({
         }
     }
 });
+
 const Online = React.createClass({
     mixins: [WildReact],
     getInitialState(){
@@ -193,6 +199,7 @@ const Online = React.createClass({
         const gameState = this.props.gameState;
         if (gameState) {
             if (gameState.state === 'WAITING') {
+                //TODO:如果人数不足，提示人数不足
                 gameStatemsg = <div>请稍等片刻</div>
             } else if (gameState.state === 'GAME_START') {
                 gameStatemsg = <div><Clock startTime={gameState.startTime}></Clock></div>
@@ -221,6 +228,8 @@ const Online = React.createClass({
 });
 
 
+
+
 const Chat = React.createClass({
     mixins: [WildReact],
     getInitialState(){
@@ -239,7 +248,7 @@ const Chat = React.createClass({
         this.setState({value: event.target.value})
     },
     render(){
-        const chats = this.state.chatroom.map((v, i)=> {
+        const chats = this.state.chatroom.slice(1).map((v, i)=> {
             const imgSrc = `./img/head${hashCode(v.name) % 20 + 1}.jpg`;
             return (
                 <li key={i}><img src={imgSrc} alt=""/>
@@ -260,12 +269,52 @@ const Chat = React.createClass({
                 </ul>
                 <form>
                     <input className="text_input" value={this.state.value} onChange={this.onChange}/>
-                    <button className="text_button" type="submit" onClick={this.send}>submit</button>
+                    <button className="text_button" type="submit" onClick={this.send}>发送</button>
                 </form>
             </div>
         )
     }
 });
+
+const Loading = (props)=>{
+    return (
+        <div className="loading">
+
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="64" height="64" fill="blank">
+                <circle cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(45 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.125s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(90 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.25s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(135 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.375s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(225 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.625s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(270 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.75s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(315 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.875s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+                <circle transform="rotate(180 16 16)" cx="16" cy="3" r="0">
+                    <animate attributeName="r" values="0;3;0;0" dur="1s" repeatCount="indefinite" begin="0.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" calcMode="spline" />
+                </circle>
+            </svg>
+
+        </div>
+    )
+
+}
+
 const App = React.createClass({
     mixins: [WildReact],
     getInitialState(){
@@ -275,7 +324,7 @@ const App = React.createClass({
         this.bindAsObject(gameState, "gameState")
     },
     render(){
-        if (!this.state.gameState) return <div>loading</div>;
+        if (!this.state.gameState) return <Loading/>;
         const disable = this.state.gameState.userNow === username ? false : true;
         return (
             <div className="app">

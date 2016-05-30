@@ -26,7 +26,7 @@ app.use(session(app));
 
 // TODO mock 用户
 app.use(function*(next){
-  this.session.username = 'wkc';
+  this.session.username = 'chl';
   yield next
 });
 
